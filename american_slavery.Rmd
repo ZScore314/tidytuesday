@@ -1,0 +1,24 @@
+---
+title: "American Slavery"
+subtitle: "Tidy Tuesday 2020-06-16"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
+
+tuesdata <- tidytuesdayR::tt_load('2020-06-16')
+tuesdata
+
+census <- tuesdata$census
+slave_routes <- tuesdata$slave_routes
+african_names <- tuesdata$african_names
+blackpast <- tuesdata$blackpast
+
+```
+
+```{r}
+blackpast
+```
+
