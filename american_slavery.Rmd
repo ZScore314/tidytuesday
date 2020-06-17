@@ -88,3 +88,24 @@ ggplot(gg_dat) +
 ```
 
 
+## Slave Routes
+
+```{r}
+head(slave_routes)
+
+ggplot(slave_routes, aes(year_arrival)) +
+  geom_histogram()
+
+slave_routes %>%
+  filter(!is.na(n_slaves_arrived)) %>%
+  replace_na(list(port_arrival = "Unknown")) %>%
+  mutate(port_arrival = ifelse(port_arrival == "???", "Unknown", port_arrival)) %>%
+  mutate(port_arrival = fct_lump(port_arrival, 10)) %>%
+  count(port_arrival, wt = n_slaves_arrived, sort = TRUE) %>%
+  filter(port_arrival != "Other") %>%
+  mutate(port_arrival = fct_reorder(port_arrival, n, sum)) %>%
+  ggplot(aes(n, port_arrival)) +
+  geom_col() +
+  ggtitle("Port Accepting greatest number of slaves")
+```
+
