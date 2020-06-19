@@ -1,8 +1,15 @@
 ---
 title: "American Slavery"
-subtitle: "Tidy Tuesday 2020-06-16"
+subtitle: Tidy Tuesday 2020-06-16
+author: "Zach Eisenstein"
 output: html_notebook
 ---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 
 ```{r include=FALSE}
 library(tidyverse)
@@ -11,7 +18,6 @@ library(tidytuesdayR)
 theme_set(theme_light())
 
 tuesdata <- tidytuesdayR::tt_load('2020-06-16')
-tuesdata
 
 census <- tuesdata$census
 slave_routes <- tuesdata$slave_routes
@@ -23,8 +29,11 @@ blackpast <- tuesdata$blackpast
 ## Explore Census
 
 ```{r}
+
+tuesdata
+
 census %>%
-  distinct(region, division)
+  distinct(region)
 
 census %>%
   distinct(region, division)
@@ -40,7 +49,6 @@ census %>%
 
 # divisions sum equals total
 # will use divisions exclusively
-
 census <- census %>%
   filter(!is.na(division))
 
@@ -69,17 +77,15 @@ census_long %>%
   facet_wrap(~ region)
 ```
 
-What was the growth in black slaves leading up to the emancipation
-
+What was the growth in black slaves leading up to the emancipation?
 
 ```{r}
-gg_dat <- census_long %>%
+census_long %>%
   filter(group == "black_slaves") %>%
   count(year, wt = pop, name = "pop") %>%
   arrange(year) %>%
-  mutate(pct_growth = (pop/lag(pop) - 1))
-
-ggplot(gg_dat) +
+  mutate(pct_growth = (pop/lag(pop) - 1)) %>%
+  ggplot() + 
   geom_col(aes(x = year, y = pct_growth)) + 
   geom_text(aes(x = year, y = pct_growth, label = percent(pct_growth, accuracy = .1)),
             nudge_y = ifelse(gg_dat$pct_growth > 0, 0.05, -0.05)
@@ -97,15 +103,15 @@ ggplot(slave_routes, aes(year_arrival)) +
   geom_histogram()
 
 slave_routes %>%
-  filter(!is.na(n_slaves_arrived)) %>%
-  replace_na(list(port_arrival = "Unknown")) %>%
-  mutate(port_arrival = ifelse(port_arrival == "???", "Unknown", port_arrival)) %>%
-  mutate(port_arrival = fct_lump(port_arrival, 10)) %>%
+  filter(fct_lump(port_arrival, 10) != "Other") %>%
   count(port_arrival, wt = n_slaves_arrived, sort = TRUE) %>%
-  filter(port_arrival != "Other") %>%
   mutate(port_arrival = fct_reorder(port_arrival, n, sum)) %>%
   ggplot(aes(n, port_arrival)) +
   geom_col() +
-  ggtitle("Port Accepting greatest number of slaves")
+  scale_x_continuous(label = comma) +
+  labs(title = "Ports accepting greatest number of slaves",
+       subtitle = "Years (1514 - 1866)",
+       x = "Number of Slaves",
+       y = "Port of Arrival")
 ```
 
